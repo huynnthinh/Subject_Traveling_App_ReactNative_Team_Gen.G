@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import {
   Text,
@@ -9,13 +9,12 @@ import {
 } from "react-native";
 import AntDesign from "react-native-vector-icons/AntDesign";
 
-const Footer = ({
-  buttonFooterState,
-  setButtonFooterState,
-  favoriteList,
-  setFavoriteList,
-}) => {
+const Footer = ({ buttonFooterState }) => {
   const navigation = useNavigation();
+  const [selectedButton, setSelectedButton] = useState(buttonFooterState);
+  useEffect(() => {
+    setSelectedButton(buttonFooterState); // Update selected button state when prop changes
+  }, [selectedButton]);
   const buttonFooter = [
     { name: "Search", icon: "search1" },
     { name: "Favorites", icon: "hearto" },
@@ -25,22 +24,18 @@ const Footer = ({
   ];
 
   const renderButtonFooter = ({ item }) => {
-    const isSelected = item.name === buttonFooterState;
-
+    const isSelected = selectedButton === item.name;
     return (
       <View>
         <TouchableOpacity
           onPress={() => {
-            setButtonFooterState(item.name);
+            setSelectedButton(item.name);
             if (item.name === "Favorites") {
-              navigation.navigate("FavoriteScreen", {
-                buttonFooterState: item.name,
-                favoriteList: favoriteList, // Truyền favoriteList vào FavoriteScreen
-              });
+              navigation.navigate("FavoriteScreen");
             } else if (item.name === "Search") {
-              navigation.navigate("HomeScreen", {
-                buttonFooterState: item.name,
-              });
+              navigation.navigate("HomeScreen");
+            } else {
+              // Add navigation for other screens if needed
             }
           }}
           style={{

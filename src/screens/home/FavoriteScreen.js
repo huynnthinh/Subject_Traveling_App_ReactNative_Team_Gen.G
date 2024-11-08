@@ -1,29 +1,20 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FlatList, Image } from "react-native";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import AntDesign from "react-native-vector-icons/AntDesign";
 import Entypo from "react-native-vector-icons/Entypo";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import Footer from "./includes/Footer";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchItems, updateItemSelection } from "../data/dataSlice";
 const FavoriteScreen = () => {
-  const routed = useRoute();
-  const [buttonFooterState, setButtonFooterState] = useState(
-    routed.params?.buttonFooterState || "Favorites"
-  );
-  const [favoriteList, setFavoriteList] = useState(
-    routed.params?.favoriteList || []
-  );
   const navigation = useNavigation();
-  const toggleFavorite = (id) => {
-    const list = favoriteList.map((item) =>
-      item.id === id ? { ...item, isSelected: !item.isSelected } : item
-    );
-    setFavoriteList(list);
-    const item = list.find((item) => item.id === id);
-    setFavoriteList((prev) =>
-      item.isSelected ? prev.filter((item) => item.id !== id) : [...prev, item]
-    );
-  };
+  const dispatch = useDispatch();
+  const { items, status, error } = useSelector((state) => state.data);
+  const buttonFooterState = "Favorites";
+  // useEffect(() => {
+  //   dispatch(fetchItems());
+  // }, []);
   const renderItem = ({ item }) => {
     return (
       <View style={{ marginVertical: 20 }}>
@@ -41,7 +32,7 @@ const FavoriteScreen = () => {
             alignItems: "center",
           }}
           onPress={() => {
-            toggleFavorite(item.id);
+            dispatch(updateItemSelection(item.id));
           }}
         >
           <AntDesign
@@ -114,16 +105,13 @@ const FavoriteScreen = () => {
       </View>
       <View style={{ flex: 7 }}>
         <FlatList
-          data={favoriteList}
+          data={items.filter((item) => item.isSelected)}
           renderItem={renderItem}
           contentContainerStyle={{ alignItems: "center" }}
           keyExtractor={(item) => item.id.toString()}
         />
       </View>
-      <Footer
-        buttonFooterState={buttonFooterState}
-        setButtonFooterState={setButtonFooterState}
-      />
+      <Footer buttonFooterState={buttonFooterState} />
     </View>
   );
 };

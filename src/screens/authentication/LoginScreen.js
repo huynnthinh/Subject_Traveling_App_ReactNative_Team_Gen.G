@@ -1,5 +1,5 @@
 import { useNavigation } from "@react-navigation/native";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Image,
   StyleSheet,
@@ -10,9 +10,16 @@ import {
 } from "react-native";
 import Picker from "react-native-picker-select";
 import AntDesign from "react-native-vector-icons/AntDesign";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchAccounts } from "../data/dataSlice";
+import { Audio } from "expo-av";
 const LoginScreen = () => {
   const [countryCode, setCountryCode] = useState("+84");
-
+  const dispatch = useDispatch();
+  const { accounts, status, error } = useSelector((state) => state.data);
+  useEffect(() => {
+    dispatch(fetchAccounts());
+  }, []);
   const countryCodes = [
     {
       label: "Vietnam (+84)",
@@ -34,15 +41,27 @@ const LoginScreen = () => {
     (country) => country.value == countryCode
   );
 
+  const playSuccessSound = async () => {
+    const { sound } = await Audio.Sound.createAsync(
+      require("../../../assets/sounds/waterdrop.mp3")
+    );
+    await sound.playAsync();
+  };
   const [phone, setPhone] = useState("");
 
   const navigation = useNavigation();
   const validateInput = () => {
-    const phoneRegex = /^[0-9]{1}$/;
+    const phoneRegex = /^[0-9]{10}$/;
     if (!phoneRegex.test(phone)) {
       alert("Invalid phone number");
     } else {
-      navigation.navigate("HomeScreen");
+      if (accounts.find((account) => account.phone === phone)) {
+        alert("Success");
+        navigation.navigate("HomeScreen");
+        playSuccessSound();
+      } else {
+        alert("Account does not exist");
+      }
     }
   };
   return (

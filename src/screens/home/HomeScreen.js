@@ -13,186 +13,15 @@ import AntDesign from "react-native-vector-icons/AntDesign";
 import Entypo from "react-native-vector-icons/Entypo";
 import { useNavigation } from "@react-navigation/native";
 import Footer from "./includes/Footer";
-
+import { useDispatch, useSelector } from "react-redux";
+import { fetchItems, updateItemSelection } from "../data/dataSlice";
 const HomeScreen = () => {
+  const dispatch = useDispatch();
+  const { items, status, error } = useSelector((state) => state.data);
   useEffect(() => {
-    setButtonFooterState("Search");
+    dispatch(fetchItems());
   }, []);
-
   const navigation = useNavigation();
-  const [beach, setBeach] = useState([
-    {
-      id: 1,
-      type: "Beach",
-      name: "Ocean View Resort",
-      evaluated: 4.5,
-      price: 200,
-      image: "https://picsum.photos/200/300?random=1",
-      icon: "hearto",
-      icon1: "heart",
-      isSelected: false,
-    },
-    {
-      id: 2,
-      type: "Beach",
-      name: "Sunny Sands Hotel",
-      evaluated: 4.7,
-      price: 150,
-      image: "https://picsum.photos/200/300?random=2",
-      icon: "hearto",
-      icon1: "heart",
-      isSelected: false,
-    },
-    {
-      id: 3,
-      type: "Beach",
-      name: "Tropical Paradise",
-      evaluated: 4.8,
-      price: 250,
-      image: "https://picsum.photos/200/300?random=3",
-      icon: "hearto",
-      icon1: "heart",
-      isSelected: false,
-    },
-    {
-      id: 4,
-      type: "Beach",
-      name: "Seaside Escape",
-      evaluated: 4.6,
-      price: 180,
-      image: "https://picsum.photos/200/300?random=4",
-      icon: "hearto",
-      icon1: "heart",
-      isSelected: false,
-    },
-    {
-      id: 5,
-      type: "Beach",
-      name: "Coastal Retreat",
-      evaluated: 4.9,
-      price: 300,
-      image: "https://picsum.photos/200/300?random=5",
-      icon: "hearto",
-      icon1: "heart",
-      isSelected: false,
-    },
-  ]);
-
-  const [mountain, setMountain] = useState([
-    {
-      id: 6,
-      type: "Mountain",
-      name: "Mountain View Lodge",
-      evaluated: 4.6,
-      price: 220,
-      image: "https://picsum.photos/200/300?random=6",
-      icon: "hearto",
-      icon1: "heart",
-      isSelected: false,
-    },
-    {
-      id: 7,
-      type: "Mountain",
-      name: "Alpine Retreat",
-      evaluated: 4.8,
-      price: 280,
-      image: "https://picsum.photos/200/300?random=7",
-      icon: "hearto",
-      icon1: "heart",
-      isSelected: false,
-    },
-    {
-      id: 8,
-      type: "Mountain",
-      name: "Highland Cabin",
-      evaluated: 4.7,
-      price: 250,
-      image: "https://picsum.photos/200/300?random=8",
-      icon: "hearto",
-      icon1: "heart",
-      isSelected: false,
-    },
-    {
-      id: 9,
-      type: "Mountain",
-      name: "Snowy Peaks Inn",
-      evaluated: 4.9,
-      price: 300,
-      image: "https://picsum.photos/200/300?random=9",
-      icon: "hearto",
-      icon1: "heart",
-      isSelected: false,
-    },
-    {
-      id: 10,
-      type: "Mountain",
-      name: "Canyon View Resort",
-      evaluated: 4.5,
-      price: 190,
-      image: "https://picsum.photos/200/300?random=10",
-      icon: "hearto",
-      icon1: "heart",
-      isSelected: false,
-    },
-  ]);
-
-  const [camping, setCamping] = useState([
-    {
-      id: 11,
-      type: "Camping",
-      name: "Riverside Campground",
-      evaluated: 4.6,
-      price: 220,
-      image: "https://picsum.photos/200/300?random=11",
-      icon: "hearto",
-      icon1: "heart",
-      isSelected: false,
-    },
-    {
-      id: 12,
-      type: "Camping",
-      name: "Forest Retreat",
-      evaluated: 4.8,
-      price: 280,
-      image: "https://picsum.photos/200/300?random=12",
-      icon: "hearto",
-      icon1: "heart",
-      isSelected: false,
-    },
-    {
-      id: 13,
-      type: "Camping",
-      name: "Lakeside Camp",
-      evaluated: 4.7,
-      price: 250,
-      image: "https://picsum.photos/200/300?random=13",
-      icon: "hearto",
-      icon1: "heart",
-      isSelected: false,
-    },
-    {
-      id: 14,
-      type: "Camping",
-      name: "Mountain Camp",
-      evaluated: 4.9,
-      price: 300,
-      image: "https://picsum.photos/200/300?random=14",
-      icon: "hearto",
-      icon1: "heart",
-      isSelected: false,
-    },
-    {
-      id: 15,
-      type: "Camping",
-      name: "Wilderness Camp",
-      evaluated: 4.5,
-      price: 190,
-      image: "https://picsum.photos/200/300?random=15",
-      icon: "hearto",
-      icon1: "heart",
-      isSelected: false,
-    },
-  ]);
 
   const [buttonState, setButtonState] = useState("Beach");
   const buttonName = [
@@ -200,8 +29,8 @@ const HomeScreen = () => {
     { name: "Mountain", icon: "mountain" },
     { name: "Camping", icon: "campground" },
   ];
-  const [buttonFooterState, setButtonFooterState] = useState("Search");
-  const [favoriteList, setFavoriteList] = useState([]);
+  const buttonFooterState = "Search";
+  // const [favoriteList, setFavoriteList] = useState([]);
 
   const renderButton = ({ item }) => {
     const isSelected = item.name === buttonState;
@@ -254,7 +83,7 @@ const HomeScreen = () => {
             alignItems: "center",
           }}
           onPress={() => {
-            toggleFavorite(item.id);
+            dispatch(updateItemSelection(item.id));
           }}
         >
           <AntDesign
@@ -306,31 +135,7 @@ const HomeScreen = () => {
       </View>
     );
   };
-  const toggleFavorite = (id) => {
-    if (buttonState === "Beach") {
-      const newBeach = beach.map((item) =>
-        item.id === id ? { ...item, isSelected: !item.isSelected } : item
-      );
-      setBeach(newBeach);
-    } else if (buttonState === "Mountain") {
-      const newMountain = mountain.map((item) =>
-        item.id === id ? { ...item, isSelected: !item.isSelected } : item
-      );
-      setMountain(newMountain);
-    } else {
-      const newCamping = camping.map((item) =>
-        item.id === id ? { ...item, isSelected: !item.isSelected } : item
-      );
-      setCamping(newCamping);
-    }
 
-    const item = [...beach, ...mountain, ...camping].find(
-      (item) => item.id === id
-    );
-    setFavoriteList((prev) =>
-      item.isSelected ? prev.filter((item) => item.id !== id) : [...prev, item]
-    );
-  };
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -365,24 +170,13 @@ const HomeScreen = () => {
       </View>
       <View style={styles.body}>
         <FlatList
-          data={
-            buttonState === "Beach"
-              ? beach
-              : buttonState === "Mountain"
-              ? mountain
-              : camping
-          }
+          data={items.filter((item) => item.type === buttonState)}
           renderItem={renderItem}
           keyExtractor={(item) => item.id.toString()}
           contentContainerStyle={{ alignItems: "center" }}
         />
       </View>
-      <Footer
-        buttonFooterState={buttonFooterState}
-        setButtonFooterState={setButtonFooterState}
-        favoriteList={favoriteList}
-        setFavoriteList={setFavoriteList}
-      />
+      <Footer buttonFooterState={buttonFooterState} />
     </View>
   );
 };
