@@ -14,16 +14,23 @@
     "@react-navigation/stack": "^6.4.1",
     "@reduxjs/toolkit": "^2.3.0",
     "expo": "~51.0.28",
+    "expo-av": "^14.0.7",
     "expo-status-bar": "~1.12.1",
+    "express": "^4.21.1",
+    "mariadb": "^3.4.0",
     "react": "18.2.0",
     "react-native": "0.74.5",
+    "react-native-calendars": "^1.1307.0",
     "react-native-picker-select": "^9.3.1",
     "react-native-vector-icons": "^10.2.0",
-    "expo-av": "^14.0.7",
-    "react-native-calendars": "^1.1307.0"
+    "react-native-ratings": "^8.1.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"
   },
-  "private": true
+  "private": true,
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": ""
 }

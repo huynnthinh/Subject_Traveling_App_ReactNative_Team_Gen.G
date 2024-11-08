@@ -92,7 +92,11 @@ const HomeScreen = () => {
             color={item.isSelected ? "red" : "grey"}
           />
         </TouchableOpacity>
-        <TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => {
+            navigation.navigate("RoomScreen", { item });
+          }}
+        >
           <Image
             source={{ uri: item.image }}
             style={{ width: 350, height: 350, borderRadius: 10 }}

@@ -5,6 +5,9 @@ import Index from "../screens/Index.js";
 import HomeScreen from "../screens/home/HomeScreen";
 import FavoriteScreen from "../screens/home/FavoriteScreen.js";
 import SearchScreen from "../screens/home/SearchScreen.js";
+import RoomScreen from "../screens/home/RoomScreen.js";
+import ReviewScreen from "../screens/home/ReviewScreen.js";
+import FacilityScreen from "../screens/home/FacilityScreen.js";
 const Navigation = () => {
   const Stack = createStackNavigator();
   return (
@@ -33,6 +36,21 @@ const Navigation = () => {
         <Stack.Screen
           name="SearchScreen"
           component={SearchScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="RoomScreen"
+          component={RoomScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="ReviewScreen"
+          component={ReviewScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="FacilityScreen"
+          component={FacilityScreen}
           options={{ headerShown: false }}
         />
       </Stack.Navigator>

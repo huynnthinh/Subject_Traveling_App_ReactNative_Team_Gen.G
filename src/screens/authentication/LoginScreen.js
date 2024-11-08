@@ -52,6 +52,7 @@ const LoginScreen = () => {
   const navigation = useNavigation();
   const validateInput = () => {
     const phoneRegex = /^[0-9]{10}$/;
+    console.log(accounts);
     if (!phoneRegex.test(phone)) {
       alert("Invalid phone number");
     } else {
