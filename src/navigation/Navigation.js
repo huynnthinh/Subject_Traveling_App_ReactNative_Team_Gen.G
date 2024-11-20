@@ -8,6 +8,7 @@ import SearchScreen from "../screens/home/SearchScreen.js";
 import RoomScreen from "../screens/home/RoomScreen.js";
 import ReviewScreen from "../screens/home/ReviewScreen.js";
 import FacilityScreen from "../screens/home/FacilityScreen.js";
+import InboxScreen from "../screens/home/InboxScreen.js";
 const Navigation = () => {
   const Stack = createStackNavigator();
   return (
@@ -51,6 +52,11 @@ const Navigation = () => {
         <Stack.Screen
           name="FacilityScreen"
           component={FacilityScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="InboxScreen"
+          component={InboxScreen}
           options={{ headerShown: false }}
         />
       </Stack.Navigator>

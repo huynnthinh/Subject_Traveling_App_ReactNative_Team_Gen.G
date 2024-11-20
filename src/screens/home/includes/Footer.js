@@ -34,8 +34,8 @@ const Footer = ({ buttonFooterState }) => {
               navigation.navigate("FavoriteScreen");
             } else if (item.name === "Search") {
               navigation.navigate("HomeScreen");
-            } else {
-              // Add navigation for other screens if needed
+            } else if (item.name === "Inbox") {
+              navigation.navigate("InboxScreen");
             }
           }}
           style={{

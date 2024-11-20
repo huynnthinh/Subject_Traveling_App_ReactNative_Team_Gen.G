@@ -8,7 +8,6 @@ import {
   FlatList,
   TextInput,
   Modal,
-  Alert,
 } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { CalendarList } from "react-native-calendars";
@@ -16,14 +15,20 @@ import moment from "moment";
 import { Dimensions } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 
-const LoginScreen = () => {
+const SearchScreen = () => {
   const navigation = useNavigation();
   const [modalVisible, setModalVisible] = useState(false);
-  const [selectedDate, setSelectedDate] = useState(null); // Khởi tạo là null
+  const [selectedDate, setSelectedDate] = useState(
+    moment().format("YYYY-MM-DD")
+  ); // Default to today
   const calendarRef = useRef(null);
   const [days, setDays] = useState(1);
-  const [dateRange, setDateRange] = useState("Add time"); // Giá trị mặc định
+  const [adults, setAdults] = useState(0);
+  const [children, setChildren] = useState(0);
+  const [dateRange, setDateRange] = useState("Add time");
   const [idSelected, setIdSelected] = useState("1");
+  const [guestModalVisible, setGuestModalVisible] = useState(false);
+  const [guests, setGuests] = useState("Add guests"); // Initial state for guests
   const destinations = [
     {
       id: "1",
@@ -77,27 +82,68 @@ const LoginScreen = () => {
     }
   };
 
+  //giảm ngày
   const handleReduceDays = () => {
     if (days > 1) {
       setDays((prevDays) => prevDays - 1);
     }
   };
 
+  //tăng ngày
   const handleIncreaseDays = () => {
     setDays((prevDays) => prevDays + 1);
   };
 
+  //nút next trong lịch
   const handleNext = () => {
     if (selectedDate) {
       const startDate = moment(selectedDate);
       const endDate = startDate.clone().add(days - 1, "days");
       const range = `${startDate.format("D MMM")} - ${endDate.format("D MMM")}`;
-
-      setDateRange(range); // Cập nhật khoảng thời gian
+      setDateRange(range);
     }
-    setModalVisible(false); // Đóng modal sau khi nhấn nút Next
+    setModalVisible(false);
   };
 
+  //mở modal thêm guests
+  const handleOpenGuestModal = () => {
+    setGuestModalVisible(true);
+  };
+
+  //tắt modal thêm guests
+  const handleCloseGuestModal = () => {
+    setGuestModalVisible(false);
+  };
+
+  //tắt modal lịch
+  const handleCloseCalendarListModal = () => {
+    setModalVisible(false);
+  };
+
+  // tăng giảm Adults
+  const handleIncreaseAdults = () => setAdults((prev) => prev + 1);
+  const handleDecreaseAdults = () => setAdults((prev) => Math.max(0, prev - 1));
+
+  //tăng giảm Children
+  const handleIncreaseChildren = () => setChildren((prev) => prev + 1);
+  const handleDecreaseChildren = () =>
+    setChildren((prev) => Math.max(0, prev - 1));
+
+  // nút next trong thêm guest
+  const handleNextGuests = () => {
+    setGuests(`${adults} Adults - ${children} Children`);
+    handleCloseGuestModal();
+  };
+
+  //nút clear all
+  const handleClearAll = () => {
+    setSelectedDate(moment().format("YYYY-MM-DD")); // Reset ngày về hôm nay
+    setDays(1); // Reset số ngày về 1
+    setAdults(0); // Reset số người lớn về 0
+    setChildren(0); // Reset số trẻ em về 0
+    setGuests("Add guests"); // Reset văn bản khách về 'Add guests'
+    setDateRange("Add time"); // Reset văn bản khoảng thời gian về 'Add time'
+  };
   return (
     <View style={styles.container}>
       <View style={styles.back}>
@@ -235,7 +281,9 @@ const LoginScreen = () => {
                   textMonthFontSize: 16,
                   textDayHeaderFontSize: 12,
                 }}
+                minDate={moment().format("YYYY-MM-DD")} // Chỉ cho phép chọn từ ngày hiện tại trở đi
               />
+
               <View style={styles.countDay}>
                 <TouchableOpacity
                   style={styles.reduceDay}
@@ -252,7 +300,12 @@ const LoginScreen = () => {
                 </TouchableOpacity>
               </View>
               <View style={styles.footerCalendar}>
-                <Text style={{ fontSize: 18, color: "grey" }}>Skip</Text>
+                <TouchableOpacity
+                  style={{ marginTop: 20 }}
+                  onPress={handleCloseCalendarListModal}
+                >
+                  <Text style={{ fontSize: 18, color: "grey" }}>Skip</Text>
+                </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.nextButton}
                   onPress={handleNext} // Cập nhật hàm xử lý nút Next
@@ -265,15 +318,82 @@ const LoginScreen = () => {
         </Modal>
       </View>
       <View style={[styles.timeAndGuests, styles.timeAndGuestsShadow]}>
-        <Text style={styles.timeOptionText}>When</Text>
+        <Text style={styles.timeOptionText}>Add guests</Text>
         <TouchableOpacity
-          style={[styles.guestsOption, styles.timeAndGuestsShadow]}
+          style={styles.guestsOption}
+          onPress={handleOpenGuestModal}
         >
-          <Text style={styles.guestsOptionText}>Add guests</Text>
+          <Text style={styles.guestsOptionText}>{guests}</Text>
         </TouchableOpacity>
+
+        <Modal
+          visible={guestModalVisible}
+          transparent={true}
+          animationType="slide"
+          onRequestClose={handleCloseGuestModal}
+        >
+          <View style={styles.guestModalContainer}>
+            <View style={styles.guestView}>
+              <Text style={styles.titleManyGuest}>How many guests?</Text>
+              <View style={styles.countGuests}>
+                <Text style={styles.titleAdults}>Adults</Text>
+                <View style={styles.countChildren}>
+                  <TouchableOpacity
+                    style={styles.reduceGuests}
+                    onPress={handleDecreaseAdults}
+                  >
+                    <Text>-</Text>
+                  </TouchableOpacity>
+                  <Text style={styles.titleGuest}>{adults}</Text>
+                  <TouchableOpacity
+                    style={styles.reduceGuests}
+                    onPress={handleIncreaseAdults}
+                  >
+                    <Text>+</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+              <View style={styles.countGuests}>
+                <Text style={styles.titleAdults}>Children</Text>
+                <View style={styles.countChildren}>
+                  <TouchableOpacity
+                    style={styles.reduceGuests}
+                    onPress={handleDecreaseChildren}
+                  >
+                    <Text>-</Text>
+                  </TouchableOpacity>
+                  <Text style={styles.titleGuest}>{children}</Text>
+                  <TouchableOpacity
+                    style={styles.reduceGuests}
+                    onPress={handleIncreaseChildren}
+                  >
+                    <Text>+</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+              <View style={styles.footerGuest}>
+                <TouchableOpacity
+                  style={{ marginTop: 20 }}
+                  onPress={handleCloseGuestModal} // Close modal on Skip
+                >
+                  <Text style={{ fontSize: 18, color: "grey" }}>Skip</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.nextButton}
+                  onPress={handleNextGuests}
+                >
+                  <Text style={styles.nextText}>Next</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
       </View>
       <View style={styles.footer}>
-        <Text style={styles.textClear}>Clear all</Text>
+        <TouchableOpacity onPress={handleClearAll}>
+          <Text style={styles.textClear}>Clear all</Text>
+        </TouchableOpacity>
+
         <TouchableOpacity style={styles.searchButton}>
           <Ionicons
             name="search"
@@ -479,44 +599,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
   },
   calendarHeaderText: {
-    fontSize: 23,
+    fontSize: 18,
     fontWeight: "bold",
-  },
-  footerCalendar: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  chooseDate: {
-    flexDirection: "row",
-    width: "100%",
-    marginBottom: 40,
-  },
-  buttonChooseLeft: {
-    width: "50%",
-    height: 40,
-    borderBottomLeftRadius: 20,
-    borderTopLeftRadius: 20,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#00BDD5",
-  },
-  buttonChooseRight: {
-    width: "50%",
-    height: 40,
-    borderBottomRightRadius: 20,
-    borderTopRightRadius: 20,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#F3F4F6",
-  },
-  chooseText: {
-    fontSize: 16,
-    color: "white",
-  },
-  chooseText1: {
-    fontSize: 16,
-    color: "grey",
   },
   countDay: {
     flexDirection: "row",
@@ -555,6 +639,96 @@ const styles = StyleSheet.create({
     textAlign: "center",
     lineHeight: 45,
   },
+  footerCalendar: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: 20,
+  },
+  guestModalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  guestView: {
+    backgroundColor: "#fff",
+    padding: 20,
+    borderRadius: 8,
+    width: "90%",
+  },
+  titleManyGuest: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 20,
+  },
+  countGuests: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  titleAdults: {
+    fontSize: 18,
+    color: "#333",
+  },
+  countChildren: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  reduceGuests: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 25,
+    padding: 10,
+    height: 35,
+    width: 35,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  titleGuest: {
+    fontSize: 18,
+    fontWeight: "bold",
+    width: 30,
+    textAlign: "center",
+  },
+  footerGuest: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: 20,
+  },
+  chooseDate: {
+    flexDirection: "row",
+    width: "100%",
+    marginBottom: 40,
+  },
+  buttonChooseLeft: {
+    width: "50%",
+    height: 40,
+    borderBottomLeftRadius: 20,
+    borderTopLeftRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#00BDD5",
+  },
+  chooseText: {
+    fontSize: 16,
+    color: "white",
+  },
+  chooseText1: {
+    fontSize: 16,
+    color: "grey",
+  },
+  buttonChooseRight: {
+    width: "50%",
+    height: 40,
+    borderBottomRightRadius: 20,
+    borderTopRightRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#F3F4F6",
+  },
 });
 
-export default LoginScreen;
+export default SearchScreen;
