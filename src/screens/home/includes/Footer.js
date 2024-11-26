@@ -36,6 +36,8 @@ const Footer = ({ buttonFooterState }) => {
               navigation.navigate("HomeScreen");
             } else if (item.name === "Inbox") {
               navigation.navigate("InboxScreen");
+            } else if (item.name == "Profile") {
+              navigation.navigate("ProfileScreen");
             }
           }}
           style={{

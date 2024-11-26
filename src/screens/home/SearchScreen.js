@@ -32,21 +32,32 @@ const SearchScreen = () => {
   const destinations = [
     {
       id: "1",
-      name: "Anywhere",
+      name: "Mọi nơi",
       image:
-        "https://eurotravel.com.vn/wp-content/uploads/2023/03/nui-matterhorn-bieu-tuong-gan-lien-voi-dat-nuoc-thuy-si.jpg",
+        "https://png.pngtree.com/thumb_back/fw800/background/20240325/pngtree-vietnam-nature-beautiful-scenery-art-ai-image_15688473.jpg",
     },
     {
       id: "2",
-      name: "Europe",
+      name: "Miền Trung",
       image:
-        "https://static1.cafeland.vn/cafelandnew/hinh-anh/2022/10/08/153/thap-4.jpg",
+        "https://image.vietgoing.com/destination/2024/sun-world-ba-na-hills-10.jpg",
     },
     {
       id: "3",
-      name: "Asia",
+      name: "Miền Nam",
       image:
-        "https://www.vietnambooking.com/wp-content/uploads/2020/01/tour-du-lich-chau-a-6-1.jpg",
+        "https://static.vinwonders.com/production/Du-lich-mien-Nam-thang-1-15.jpg",
+    },
+    {
+      id: "4",
+      name: "Miền Bắc",
+      image: "https://statics.vinpearl.com/ha-long_1661244496.jpg",
+    },
+    {
+      id: "5",
+      name: "Miền Tây",
+      image:
+        "https://demoda.vn/wp-content/uploads/2022/01/anh-que-huong-mien-tay-1.jpg",
     },
   ];
 
@@ -134,8 +145,6 @@ const SearchScreen = () => {
     setGuests(`${adults} Adults - ${children} Children`);
     handleCloseGuestModal();
   };
-
-  //nút clear all
   const handleClearAll = () => {
     setSelectedDate(moment().format("YYYY-MM-DD")); // Reset ngày về hôm nay
     setDays(1); // Reset số ngày về 1
@@ -195,14 +204,15 @@ const SearchScreen = () => {
           />
         </View>
       </View>
-      <View style={[styles.timeAndGuests, styles.timeAndGuestsShadow]}>
+      <TouchableOpacity
+        style={[styles.timeAndGuests, styles.timeAndGuestsShadow]}
+        onPress={handleOpenDatePicker} // Mở Modal khi nhấn
+      >
+        {/* Hiển thị thông tin ngày được chọn */}
         <Text style={styles.timeOptionText}>When</Text>
-        <TouchableOpacity
-          style={[styles.guestsOption, styles.timeAndGuestsShadow]}
-          onPress={handleOpenDatePicker}
-        >
-          <Text style={styles.guestsOptionText}>{dateRange}</Text>
-        </TouchableOpacity>
+        <Text style={styles.guestsOptionText}>{dateRange}</Text>
+
+        {/* Modal */}
         <Modal
           visible={modalVisible}
           transparent={true}
@@ -281,9 +291,8 @@ const SearchScreen = () => {
                   textMonthFontSize: 16,
                   textDayHeaderFontSize: 12,
                 }}
-                minDate={moment().format("YYYY-MM-DD")} // Chỉ cho phép chọn từ ngày hiện tại trở đi
+                minDate={moment().format("YYYY-MM-DD")}
               />
-
               <View style={styles.countDay}>
                 <TouchableOpacity
                   style={styles.reduceDay}
@@ -308,7 +317,7 @@ const SearchScreen = () => {
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.nextButton}
-                  onPress={handleNext} // Cập nhật hàm xử lý nút Next
+                  onPress={handleNext}
                 >
                   <Text style={styles.nextText}>Next</Text>
                 </TouchableOpacity>
@@ -316,16 +325,16 @@ const SearchScreen = () => {
             </View>
           </View>
         </Modal>
-      </View>
-      <View style={[styles.timeAndGuests, styles.timeAndGuestsShadow]}>
-        <Text style={styles.timeOptionText}>Add guests</Text>
-        <TouchableOpacity
-          style={styles.guestsOption}
-          onPress={handleOpenGuestModal}
-        >
-          <Text style={styles.guestsOptionText}>{guests}</Text>
-        </TouchableOpacity>
+      </TouchableOpacity>
 
+      <TouchableOpacity
+        style={[styles.timeAndGuests, styles.timeAndGuestsShadow]}
+        onPress={handleOpenGuestModal}
+      >
+        <Text style={styles.timeOptionText}>Add guests</Text>
+        <Text style={styles.guestsOptionText}>{guests}</Text>
+
+        {/* Modal */}
         <Modal
           visible={guestModalVisible}
           transparent={true}
@@ -335,6 +344,8 @@ const SearchScreen = () => {
           <View style={styles.guestModalContainer}>
             <View style={styles.guestView}>
               <Text style={styles.titleManyGuest}>How many guests?</Text>
+
+              {/* Số lượng Adults */}
               <View style={styles.countGuests}>
                 <Text style={styles.titleAdults}>Adults</Text>
                 <View style={styles.countChildren}>
@@ -353,6 +364,7 @@ const SearchScreen = () => {
                   </TouchableOpacity>
                 </View>
               </View>
+
               <View style={styles.countGuests}>
                 <Text style={styles.titleAdults}>Children</Text>
                 <View style={styles.countChildren}>
@@ -371,10 +383,11 @@ const SearchScreen = () => {
                   </TouchableOpacity>
                 </View>
               </View>
+
               <View style={styles.footerGuest}>
                 <TouchableOpacity
                   style={{ marginTop: 20 }}
-                  onPress={handleCloseGuestModal} // Close modal on Skip
+                  onPress={handleCloseGuestModal}
                 >
                   <Text style={{ fontSize: 18, color: "grey" }}>Skip</Text>
                 </TouchableOpacity>
@@ -388,13 +401,31 @@ const SearchScreen = () => {
             </View>
           </View>
         </Modal>
-      </View>
+      </TouchableOpacity>
       <View style={styles.footer}>
         <TouchableOpacity onPress={handleClearAll}>
           <Text style={styles.textClear}>Clear all</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.searchButton}>
+        <TouchableOpacity
+          style={styles.searchButton}
+          onPress={() => {
+            // Tính toán số khách
+            const totalGuests = adults + children;
+            const numberOfBeds =
+              totalGuests % 2 === 0
+                ? totalGuests / 2
+                : Math.floor(totalGuests / 2) + 1;
+
+            // Chuyển đến HomeScreen với thông tin tìm kiếm
+            navigation.navigate("HomeScreen1", {
+              selectedDate: dateRange,
+              guests: guests,
+              numberOfBeds: numberOfBeds, // Truyền số giường
+            });
+            console.log(numberOfBeds);
+          }}
+        >
           <Ionicons
             name="search"
             size={20}

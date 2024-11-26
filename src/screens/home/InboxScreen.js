@@ -11,80 +11,12 @@ import AntDesign from "react-native-vector-icons/AntDesign";
 import { TextInput } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { TouchableOpacity } from "react-native";
-
+import Fuse from "fuse.js";
+import bookingFAQs from "../data/bookingFAQs";
 const InboxScreen = () => {
   const [buttonFooterState, setButtonFooterState] = useState("Inbox");
   const navigation = useNavigation();
-  const bookingFAQs = [
-    {
-      id: 1,
-      clientQuestion: "Làm thế nào để tôi đặt phòng?",
-      botAnswer:
-        "Bạn có thể đặt phòng trực tuyến thông qua trang web của chúng tôi bằng cách chọn ngày và loại phòng.",
-      category: "Đặt phòng",
-    },
-    {
-      id: 2,
-      clientQuestion: "Tôi có thể hủy đặt phòng không?",
-      botAnswer:
-        "Có, bạn có thể hủy đặt phòng của mình miễn phí trong vòng 24 giờ trước khi đến.",
-      category: "Đặt phòng",
-    },
-    {
-      id: 3,
-      clientQuestion: "Có cần phải trả tiền trước khi nhận phòng không?",
-      botAnswer:
-        "Một số phòng yêu cầu thanh toán trước, nhưng cũng có tùy chọn thanh toán khi nhận phòng.",
-      category: "Thanh toán",
-    },
-    {
-      id: 4,
-      clientQuestion: "Tôi có thể thay đổi ngày đặt phòng không?",
-      botAnswer:
-        "Có, bạn có thể thay đổi ngày đặt phòng của mình bằng cách liên hệ với bộ phận hỗ trợ khách hàng.",
-      category: "Đặt phòng",
-    },
-    {
-      id: 5,
-      clientQuestion: "Có chương trình giảm giá nào không?",
-      botAnswer: "Có cái cc. Khách chứ không phải thượng đế. Biến mày",
-      category: "Khuyến mãi",
-    },
-    {
-      id: 6,
-      clientQuestion: "Có thể đặt phòng cho nhóm lớn không?",
-      botAnswer:
-        "Có, chúng tôi có các gói đặt phòng cho nhóm lớn. Vui lòng liên hệ với chúng tôi để biết thêm thông tin.",
-      category: "Đặt phòng",
-    },
-    {
-      id: 7,
-      clientQuestion: "Có dịch vụ đưa đón sân bay không?",
-      botAnswer:
-        "Có, chúng tôi cung cấp dịch vụ đưa đón sân bay với một khoản phí bổ sung.",
-      category: "Dịch vụ",
-    },
-    {
-      id: 8,
-      clientQuestion: "Có thể yêu cầu thêm giường không?",
-      botAnswer:
-        "Có, bạn có thể yêu cầu thêm giường khi đặt phòng, tùy thuộc vào tình trạng phòng.",
-      category: "Dịch vụ",
-    },
-    {
-      id: 9,
-      clientQuestion: "Thời gian nhận phòng và trả phòng là khi nào?",
-      botAnswer: "Thời gian nhận phòng là 14:00 và trả phòng là 12:00.",
-      category: "Thông tin chung",
-    },
-    {
-      id: 10,
-      clientQuestion: "Có dịch vụ ăn uống tại khách sạn không?",
-      botAnswer:
-        "Có, chúng tôi có nhà hàng phục vụ bữa sáng, trưa và tối ngay tại khách sạn.",
-      category: "Dịch vụ",
-    },
-  ];
+
   const [category, setCategory] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [filteredFAQs, setFilteredFAQs] = useState([]);
@@ -92,6 +24,35 @@ const InboxScreen = () => {
   const [text, setText] = useState("");
   const [isBotTyping, setIsBotTyping] = useState(false);
   const [displayedText, setDisplayedText] = useState(""); // Hiển thị tin nhắn bot với hiệu ứng
+
+  //config fuse.js
+  function removeAccentsAndSpecialChars(str) {
+    return str
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/đ/g, "d")
+      .replace(/Đ/g, "D")
+      .replace(/[^\w\s]/gi, "");
+  }
+
+  function toLowerCaseNoAccentsAndSpecialChars(str) {
+    return removeAccentsAndSpecialChars(str).toLowerCase();
+  }
+  const options = {
+    includeScore: true,
+    keys: ["normalizedQuestion"],
+    distance: 100, // Tăng yêu cầu về độ dài khớp
+    threshold: 0.4,
+    getFn: (obj, path) => toLowerCaseNoAccentsAndSpecialChars(obj[path]),
+  };
+
+  const normalizedData = bookingFAQs.map((item) => ({
+    ...item,
+    normalizedQuestion: toLowerCaseNoAccentsAndSpecialChars(
+      item.clientQuestion
+    ),
+  }));
+  const fuse = new Fuse(normalizedData, options);
 
   useEffect(() => {
     const uniqueCategories = [
@@ -109,7 +70,7 @@ const InboxScreen = () => {
       const filteredData = bookingFAQs.filter(
         (item) => item.category === selectedCategory
       );
-      console.log(filteredData);
+      // console.log(filteredData);
       filteredData.forEach((item) => {
         const count = messages.length;
         setMessages((prev) => [
@@ -135,15 +96,22 @@ const InboxScreen = () => {
     );
   };
   const handleBotResponse = (question) => {
+    if (!question) return;
+
     setMessages([
       ...messages,
       { id: Date.now(), message: question, sender: "client" },
     ]);
-    const botResponse = bookingFAQs.find(
-      (faq) => faq.clientQuestion === question
-    );
+    const questionNormalized = toLowerCaseNoAccentsAndSpecialChars(question);
+    // const botResponse = bookingFAQs.find(
+    //   (faq) => faq.clientQuestion === question
+    // );
+    const result = fuse.search(questionNormalized);
+    console.log(questionNormalized + "//");
+    console.log(result);
+    const botResponse = result[0] ? result[0].item : "";
 
-    if (botResponse) {
+    if (botResponse && question.trim().length > 3) {
       // Bot gõ câu trả lời nếu tìm thấy
       setIsBotTyping(true);
       let index = 0;
@@ -167,7 +135,7 @@ const InboxScreen = () => {
           setDisplayedText("");
           setIsBotTyping(false);
         }
-      }, 10);
+      }, 20);
     } else {
       // Câu trả lời mặc định khi không tìm thấy
       setMessages((prev) => [
@@ -253,16 +221,7 @@ const InboxScreen = () => {
               { backgroundColor: "#e0f7fa" },
             ]}
           >
-            <Text style={[styles.messageText]}>Chào mày!</Text>
-          </View>
-          <View
-            style={[
-              styles.messageContainer,
-              styles.serverMessage,
-              { backgroundColor: "#e0f7fa" },
-            ]}
-          >
-            <Text style={[styles.messageText]}>Mày muốn gì ở tao?</Text>
+            <Text style={[styles.messageText]}>Chào bạn!</Text>
           </View>
           <View
             style={[
@@ -272,7 +231,19 @@ const InboxScreen = () => {
             ]}
           >
             <Text style={[styles.messageText]}>
-              Phone cho tao: 0336784220 hoặc Zalo Ok!
+              Câu trả lời của mình chỉ mang tính tương đối!
+            </Text>
+          </View>
+          <View
+            style={[
+              styles.messageContainer,
+              styles.serverMessage,
+              { backgroundColor: "#e0f7fa" },
+            ]}
+          >
+            <Text style={[styles.messageText]}>
+              Bạn có thể liên hệ HOTLINE: 0336784220 để được hỗ trợ nhanh nhất
+              và chi tiết nha! Cảm ơn bạn đã sử dụng dịch vụ
             </Text>
           </View>
 
@@ -300,7 +271,7 @@ const InboxScreen = () => {
             <TextInput
               value={text}
               onChangeText={(value) => setText(value)}
-              placeholder="Sủa đi?"
+              placeholder="Bạn muốn hỏi gì?"
               style={styles.textInput}
             />
             <TouchableOpacity

@@ -469,6 +469,9 @@ const RoomScreen = () => {
             alignItems: "center",
             borderRadius: 10,
           }}
+          onPress={() => {
+            navigation.navigate("ConfirmScreen");
+          }}
         >
           <Text style={{ color: "white", fontSize: 20 }}>Book now</Text>
         </TouchableOpacity>
