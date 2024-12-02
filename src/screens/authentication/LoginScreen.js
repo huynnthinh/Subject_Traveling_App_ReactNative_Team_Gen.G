@@ -64,9 +64,14 @@ const LoginScreen = () => {
       );
       if (user) {
         dispatch(setAccount(user));
-        alert("Welcome " + user.name);
-        navigation.navigate("HomeScreen");
-        playSuccessSound();
+        if (user.ROLE === "ADMIN") {
+          navigation.navigate("UserListScreen");
+          playSuccessSound();
+        } else {
+          alert("Welcome " + user.name);
+          navigation.navigate("HomeScreen");
+          playSuccessSound();
+        }
       } else {
         alert("Invalid phone number or password");
       }

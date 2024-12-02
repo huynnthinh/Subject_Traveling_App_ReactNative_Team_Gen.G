@@ -14,6 +14,9 @@ import MyScreen from "../screens/home/ConfirmAndPay.js";
 import PaymentScreen from "../screens/home/PaymentScreen.js";
 import ProfileScreen from "../screens/home/ProfileScreen.js";
 import RegisterScreen from "../screens/authentication/RegisterScreen.js";
+import UserListScreen from "../screens/home/UserListScreen.js";
+import ItemsListScreen from "../screens/home/ItemListScreen.js";
+import BookingScreen from "../screens/home/BookingScreen.js";
 const Navigation = () => {
   const Stack = createStackNavigator();
   return (
@@ -87,6 +90,21 @@ const Navigation = () => {
         <Stack.Screen
           name="ProfileScreen"
           component={ProfileScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="UserListScreen"
+          component={UserListScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="ItemsListScreen"
+          component={ItemsListScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="BookingScreen"
+          component={BookingScreen}
           options={{ headerShown: false }}
         />
       </Stack.Navigator>

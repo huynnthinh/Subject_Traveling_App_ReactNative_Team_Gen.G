@@ -7,11 +7,7 @@ const initialState = {
   status: "idle",
   error: null,
 };
-export const ganUser = () => {
-  async (user1) => {
-    this.state.user = user1;
-  };
-};
+
 export const fetchItems = createAsyncThunk("items/fetchItems", async () => {
   const response = await fetch("http://10.10.88.44:3000/getItems");
   const data = await response.json();
@@ -26,15 +22,14 @@ export const fetchAccounts = createAsyncThunk(
     return data;
   }
 );
+
 export const updateItemSelection = createAsyncThunk(
   "items/updateItemSelection",
   async (itemId, { getState }) => {
-    // Get current state to determine current isSelected value
     const state = getState();
     const currentItem = state.data.items.find((item) => item.id === itemId);
-    const newIsSelected = !currentItem.isSelected; // Toggle isSelected value
+    const newIsSelected = !currentItem.isSelected;
 
-    // Update isSelected on the server
     await fetch(`http://10.10.88.44:3000/updateIsSelected/${itemId}`, {
       method: "PUT",
       headers: {
@@ -46,6 +41,7 @@ export const updateItemSelection = createAsyncThunk(
     return { itemId, newIsSelected };
   }
 );
+
 export const registerAccount = createAsyncThunk(
   "accounts/registerAccount",
   async (accountData) => {
@@ -78,11 +74,12 @@ export const updatePassword = createAsyncThunk(
     return data;
   }
 );
+
 export const updateInf = createAsyncThunk(
   "accounts/updateInf",
   async ({ accountId, name, diachi }) => {
     const response = await fetch(
-      `http:///10.10.88.44:3000/updateInf/${accountId}`,
+      `http://10.10.88.44:3000/updateInf/${accountId}`,
       {
         method: "PUT",
         headers: {
@@ -94,6 +91,27 @@ export const updateInf = createAsyncThunk(
     return { name, diachi };
   }
 );
+
+export const deleteAccount = createAsyncThunk(
+  "accounts/deleteAccount",
+  async (accountId) => {
+    await fetch(`http://10.10.88.44:3000/deleteAccount/${accountId}`, {
+      method: "DELETE",
+    });
+    return accountId;
+  }
+);
+
+export const deleteItem = createAsyncThunk(
+  "items/deleteItem",
+  async (itemId) => {
+    await fetch(`http://10.10.88.44:3000/deleteItem/${itemId}`, {
+      method: "DELETE",
+    });
+    return itemId;
+  }
+);
+
 export const dataSlice = createSlice({
   name: "data",
   initialState,
@@ -154,7 +172,7 @@ export const dataSlice = createSlice({
       .addCase(updatePassword.pending, (state) => {
         state.status = "loading";
       })
-      .addCase(updatePassword.fulfilled, (state, action) => {
+      .addCase(updatePassword.fulfilled, (state) => {
         state.status = "idle";
       })
       .addCase(updatePassword.rejected, (state, action) => {
@@ -173,8 +191,33 @@ export const dataSlice = createSlice({
       .addCase(updateInf.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.error.message;
+      })
+      .addCase(deleteAccount.pending, (state) => {
+        state.status = "loading";
+      })
+      .addCase(deleteAccount.fulfilled, (state, action) => {
+        state.status = "idle";
+        state.accounts = state.accounts.filter(
+          (account) => account.id !== action.payload
+        );
+      })
+      .addCase(deleteAccount.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.error.message;
+      })
+      .addCase(deleteItem.pending, (state) => {
+        state.status = "loading";
+      })
+      .addCase(deleteItem.fulfilled, (state, action) => {
+        state.status = "idle";
+        state.items = state.items.filter((item) => item.id !== action.payload);
+      })
+      .addCase(deleteItem.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.error.message;
       });
   },
 });
+
 export const { setAccount, logout } = dataSlice.actions;
 export default dataSlice.reducer;
