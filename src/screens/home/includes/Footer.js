@@ -38,6 +38,8 @@ const Footer = ({ buttonFooterState }) => {
               navigation.navigate("InboxScreen");
             } else if (item.name == "Profile") {
               navigation.navigate("ProfileScreen");
+            } else if (item.name == "Bookings") {
+              navigation.navigate("BookingScreen");
             }
           }}
           style={{

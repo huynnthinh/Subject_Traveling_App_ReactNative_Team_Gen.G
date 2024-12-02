@@ -470,7 +470,7 @@ const RoomScreen = () => {
             borderRadius: 10,
           }}
           onPress={() => {
-            navigation.navigate("ConfirmScreen");
+            navigation.navigate("ConfirmScreen", { price: item.price });
           }}
         >
           <Text style={{ color: "white", fontSize: 20 }}>Book now</Text>

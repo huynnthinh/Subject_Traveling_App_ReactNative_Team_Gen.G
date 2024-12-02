@@ -13,14 +13,14 @@ import Footer from "./includes/Footer";
 const BookingScreen = () => {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
-  const buttonFooterState = "Search";
+  const buttonFooterState = "Bookings";
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState(null);
 
   const fetchBookings = async () => {
     try {
       console.log("Fetching bookings...");
-      const response = await axios.get("http://192.168.1.4:3000/bookings");
+      const response = await axios.get("http://10.10.88.44:3000/bookings");
       console.log("Response data:", response.data);
       setBookings(response.data);
     } catch (error) {

@@ -176,7 +176,7 @@ const ProfileScreen = () => {
 
       <TouchableOpacity
         style={styles.menuItem}
-        onPress={() => navigation.navigate("BookedRoomsScreen")}
+        onPress={() => navigation.navigate("BookingScreen ")}
       >
         <Text style={styles.menuText}>Booked Rooms</Text>
       </TouchableOpacity>

@@ -1,6 +1,7 @@
 import { useNavigation } from "@react-navigation/native";
 import { useEffect, useState } from "react";
 import {
+  Alert,
   Image,
   StyleSheet,
   Text,
@@ -68,7 +69,17 @@ const LoginScreen = () => {
           navigation.navigate("UserListScreen");
           playSuccessSound();
         } else {
-          alert("Welcome " + user.name);
+          Alert.alert(
+            "Login Successful",
+            `Welcome, ${user.name}!`,
+            [
+              {
+                text: "OK",
+                onPress: () => console.log("OK Pressed"),
+              },
+            ],
+            { cancelable: false }
+          );
           navigation.navigate("HomeScreen");
           playSuccessSound();
         }

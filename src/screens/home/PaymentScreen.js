@@ -1,16 +1,32 @@
 import { useNavigation } from "@react-navigation/native";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react"; // Thêm useEffect
 import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 
 const PaymentScreen = () => {
   const [transactionData, setTransactionData] = useState({
-    refNumber: "00000072697027",
-    date: "09-05-2023",
-    time: "05:40 AM",
-    paymentMethod: "Credit card",
-    amount: "$30",
+    date: "",
+    time: "",
+    paymentMethod: "Thanh toán khi nhận phòng",
+    amount: "$260",
   });
+
+  // Sử dụng useEffect để cập nhật thời gian thực
+  useEffect(() => {
+    const now = new Date();
+    const formattedDate = now.toLocaleDateString("en-GB"); // Định dạng ngày
+    const formattedTime = now.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    }); // Định dạng thời gian
+
+    setTransactionData((prevData) => ({
+      ...prevData,
+      date: formattedDate,
+      time: formattedTime,
+    }));
+  }, []); // Chỉ chạy một lần khi component mount
 
   const handleGetPDF = () => {
     console.log("Generating PDF...");
@@ -30,7 +46,6 @@ const PaymentScreen = () => {
         <Text style={styles.title}>Payment success!</Text>
         <View style={styles.transactionDetails}>
           <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>Ref number:</Text>
             <Text style={styles.detailValue}>{transactionData.refNumber}</Text>
           </View>
           <View style={styles.detailRow}>
@@ -67,7 +82,7 @@ const PaymentScreen = () => {
       <View style={styles.space}></View>
       <TouchableOpacity
         style={styles.buttonView}
-        onPress={() => navigation.navigate("HomeScreen")}
+        onPress={() => navigation.navigate("BookingScreen")}
       >
         <Text style={styles.buttonTextView}>View booking</Text>
       </TouchableOpacity>
@@ -95,16 +110,16 @@ const styles = StyleSheet.create({
     marginBottom: 2,
     flex: 2,
     justifyContent: "flex-end",
-    position: "relative", // Thêm vị trí tương đối cho header
+    position: "relative",
   },
   img: {
     width: 100,
     height: 100,
     resizeMode: "contain",
-    position: "absolute", // Để hình ảnh có thể đè lên header
-    top: -50, // Điều chỉnh vị trí hình ảnh
-    left: "50%", // Căn giữa theo chiều ngang
-    marginLeft: -30, // Điều chỉnh để căn giữa
+    position: "absolute",
+    top: -50,
+    left: "50%",
+    marginLeft: -30,
   },
   title: {
     fontSize: 35,
