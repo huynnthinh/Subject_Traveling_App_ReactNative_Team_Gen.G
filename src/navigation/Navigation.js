@@ -13,6 +13,7 @@ import HomeScreen1 from "../screens/home/AfterSearchScreen.js";
 import MyScreen from "../screens/home/ConfirmAndPay.js";
 import PaymentScreen from "../screens/home/PaymentScreen.js";
 import ProfileScreen from "../screens/home/ProfileScreen.js";
+import RegisterScreen from "../screens/authentication/RegisterScreen.js";
 const Navigation = () => {
   const Stack = createStackNavigator();
   return (
@@ -26,6 +27,11 @@ const Navigation = () => {
         <Stack.Screen
           name="LoginScreen"
           component={LoginScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="RegisterScreen"
+          component={RegisterScreen}
           options={{ headerShown: false }}
         />
         <Stack.Screen

@@ -11,12 +11,14 @@ import {
 import Picker from "react-native-picker-select";
 import AntDesign from "react-native-vector-icons/AntDesign";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchAccounts } from "../data/dataSlice";
+import { fetchAccounts, setAccount } from "../data/dataSlice";
 import { Audio } from "expo-av";
 const LoginScreen = () => {
   const [countryCode, setCountryCode] = useState("+84");
   const dispatch = useDispatch();
-  const { accounts, status, error } = useSelector((state) => state.data);
+  const { accounts, account, tatus, error } = useSelector(
+    (state) => state.data
+  );
   useEffect(() => {
     dispatch(fetchAccounts());
   }, []);
@@ -48,29 +50,32 @@ const LoginScreen = () => {
     await sound.playAsync();
   };
   const [phone, setPhone] = useState("");
+  const [password, setPassword] = useState("");
 
   const navigation = useNavigation();
-  const validateInput = () => {
+  const validateInput = async () => {
     const phoneRegex = /^[0-9]{10}$/;
     console.log(accounts);
     if (!phoneRegex.test(phone)) {
       alert("Invalid phone number");
     } else {
-      if (accounts.find((account) => account.phone === phone)) {
-        alert("Success");
+      const user = accounts.find(
+        (account) => account.phone === phone && account.password === password
+      );
+      if (user) {
+        dispatch(setAccount(user));
+        alert("Welcome " + user.name);
         navigation.navigate("HomeScreen");
         playSuccessSound();
       } else {
-        alert("Account does not exist");
+        alert("Invalid phone number or password");
       }
     }
   };
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={[styles.text, { fontWeight: "bold" }]}>
-          Create an account
-        </Text>
+        <Text style={[styles.text, { fontWeight: "bold" }]}>Login</Text>
       </View>
       <View style={styles.middle}>
         <View>
@@ -111,6 +116,7 @@ const LoginScreen = () => {
               <AntDesign name="down" size={20} color="#000" />
             </View>
           </Picker>
+
           <TextInput
             placeholder={
               selectedCountry
@@ -122,6 +128,25 @@ const LoginScreen = () => {
             onChangeText={(text) => setPhone(text)}
           />
         </View>
+        <TextInput
+          placeholder="Password"
+          style={[
+            styles.text,
+            {
+              marginTop: 15,
+              height: 50,
+              borderWidth: 1,
+              borderColor: "#f3f4f6",
+              borderRadius: 5,
+              paddingLeft: 20,
+              marginBottom: 20,
+              marginLeft: 120,
+            },
+          ]}
+          value={password}
+          onChangeText={(text) => setPassword(text)}
+          secureTextEntry={true}
+        />
         <TouchableOpacity
           style={[styles.button, { backgroundColor: "#00bcd4" }]}
           onPress={() => {
@@ -213,10 +238,10 @@ const LoginScreen = () => {
       </View>
       <View style={styles.footer}>
         <Text style={{ fontSize: 20, color: "grey", textAlign: "center" }}>
-          Already have an account?
+          Create an account?
         </Text>
-        <TouchableOpacity>
-          <Text style={{ color: "#00bcd4", fontSize: 20 }}> Log in</Text>
+        <TouchableOpacity onPress={() => navigation.navigate("RegisterScreen")}>
+          <Text style={{ color: "#00bcd4", fontSize: 20 }}> Sign up</Text>
         </TouchableOpacity>
       </View>
     </View>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -8,23 +8,58 @@ import {
   Alert,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import Footer from "./includes/Footer";
+import { useSelector, useDispatch } from "react-redux";
+import AntDesign from "react-native-vector-icons/AntDesign";
+import { updateInf, updatePassword } from "../data/dataSlice";
 
 const ProfileScreen = () => {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [showForm, setShowForm] = useState(false);
-  const navigation = useNavigation();
+  const [showEditProfile, setShowEditProfile] = useState(false);
+  const [showAccountInfo, setShowAccountInfo] = useState(false);
 
+  const navigation = useNavigation();
+  const { account } = useSelector((state) => state.data);
+  const dispatch = useDispatch();
+  const [username, setUsername] = useState(account.name);
+  const [address, setAddress] = useState(account.diachi);
+  useEffect(() => {
+    setUsername(account.name);
+    setAddress(account.diachi);
+  }, [account]);
   const handleChangePassword = () => {
-    Alert.alert(
-      "Password Changed",
-      "Your password has been changed successfully."
-    );
-    // Reset form fields
-    setCurrentPassword("");
-    setNewPassword("");
-    setShowForm(false);
+    if (!currentPassword || !newPassword) {
+      Alert.alert("Error", "Please fill out all fields.");
+      return;
+    }
+    if (currentPassword === account.password) {
+      dispatch(updatePassword({ accountId: account.id, password: newPassword }))
+        .unwrap()
+        .then(() => {
+          Alert.alert(
+            "Password Changed",
+            "Your password has been changed successfully."
+          );
+          // Reset form fields
+          setCurrentPassword("");
+          setNewPassword("");
+          setShowForm(false);
+        })
+        .catch((error) => {
+          Alert.alert(
+            "Error",
+            "Failed to change password." +
+              account.id +
+              " " +
+              newPassword +
+              " " +
+              account.password
+          );
+        });
+    } else {
+      Alert.alert("Error", "Current password is incorrect.");
+    }
   };
 
   const handleLogout = async () => {
@@ -32,9 +67,54 @@ const ProfileScreen = () => {
     navigation.navigate("LoginScreen");
   };
 
+  const handleEditProfile = () => {
+    if (!username || !address) {
+      Alert.alert("Error", "Please fill out all fields.");
+      return;
+    }
+    dispatch(
+      updateInf({ accountId: account.id, name: username, diachi: address })
+    );
+    Alert.alert(
+      "Profile Updated",
+      "Your profile has been updated successfully."
+    );
+    // Reset form fields
+    setUsername("");
+    setAddress("");
+    setShowEditProfile(false);
+  };
+
   return (
     <View style={styles.container}>
+      <TouchableOpacity
+        style={styles.backButton}
+        onPress={() => navigation.goBack()}
+      >
+        <AntDesign name="arrowleft" size={30} color="#00796b" />
+      </TouchableOpacity>
       <Text style={styles.headerText}>Profile</Text>
+
+      <TouchableOpacity
+        style={styles.menuItem}
+        onPress={() => setShowAccountInfo(!showAccountInfo)}
+      >
+        <Text style={styles.menuText}>Personal Information</Text>
+      </TouchableOpacity>
+
+      {showAccountInfo && (
+        <View style={styles.accountInfoContainer}>
+          <Text style={styles.accountInfoText}>Name: {account.name}</Text>
+          <Text style={styles.accountInfoText}>Email: {account.email}</Text>
+          <Text style={styles.accountInfoText}>Phone: {account.phone}</Text>
+          {account.diachi && (
+            <Text style={styles.accountInfoText}>
+              Address: {account.diachi}
+            </Text>
+          )}
+        </View>
+      )}
+
       <TouchableOpacity
         style={styles.menuItem}
         onPress={() => setShowForm(!showForm)}
@@ -67,11 +147,43 @@ const ProfileScreen = () => {
         </View>
       )}
 
+      <TouchableOpacity
+        style={styles.menuItem}
+        onPress={() => setShowEditProfile(!showEditProfile)}
+      >
+        <Text style={styles.menuText}>Edit Profile</Text>
+      </TouchableOpacity>
+
+      {showEditProfile && (
+        <View style={styles.inputContainer}>
+          <TextInput
+            value={username}
+            onChangeText={setUsername}
+            placeholder="Username"
+            style={styles.textInput}
+          />
+          <TextInput
+            value={address}
+            onChangeText={setAddress}
+            placeholder="Address"
+            style={styles.textInput}
+          />
+          <TouchableOpacity style={styles.button} onPress={handleEditProfile}>
+            <Text style={styles.buttonText}>Save</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
+      <TouchableOpacity
+        style={styles.menuItem}
+        onPress={() => navigation.navigate("BookedRoomsScreen")}
+      >
+        <Text style={styles.menuText}>Booked Rooms</Text>
+      </TouchableOpacity>
+
       <TouchableOpacity style={styles.button} onPress={handleLogout}>
         <Text style={styles.buttonText}>Logout</Text>
       </TouchableOpacity>
-
-      <Footer buttonFooterState="Profile" />
     </View>
   );
 };
@@ -84,12 +196,32 @@ const styles = StyleSheet.create({
     backgroundColor: "#e0f7fa",
     padding: 20,
   },
+  backButton: {
+    position: "absolute",
+    top: 40,
+    left: 20,
+  },
   headerText: {
     fontSize: 32,
     fontWeight: "bold",
     color: "#00796b",
-    marginBottom: 40,
+    marginBottom: 20,
     textAlign: "center",
+  },
+  accountInfoContainer: {
+    backgroundColor: "#ffffff",
+    padding: 15,
+    borderRadius: 10,
+    width: "100%",
+    maxWidth: 400,
+    alignItems: "center",
+    marginBottom: 20,
+    elevation: 2,
+  },
+  accountInfoText: {
+    fontSize: 18,
+    color: "#00796b",
+    marginBottom: 5,
   },
   menuItem: {
     backgroundColor: "#ffffff",

@@ -31,7 +31,7 @@ const bookingFAQs = [
     id: 5,
     clientQuestion: "Có chương trình giảm giá nào không?",
     botAnswer:
-      "Chúng tôi thường có các chương trình khuyến mãi và giảm giá, hãy kiểm tra trang web để biết thêm chi tiết.",
+      "Chúng tôi thường có các chương trình khuyến mãi và giảm giá, vào đầu tuần trừ ngày lễ.",
     category: "Khuyến mãi",
   },
   {
@@ -66,6 +66,32 @@ const bookingFAQs = [
     clientQuestion: "Có dịch vụ ăn uống tại khách sạn không?",
     botAnswer:
       "Có, chúng tôi có nhà hàng phục vụ bữa sáng, trưa và tối ngay tại khách sạn.",
+    category: "Dịch vụ",
+  },
+  {
+    id: 11,
+    clientQuestion: "Khách sạn có khu vui chơi trẻ em không?",
+    botAnswer:
+      "Có, khách sạn của chúng tôi có khu vui chơi dành riêng cho trẻ em.",
+    category: "Dịch vụ",
+  },
+  {
+    id: 12,
+    clientQuestion: "Chính sách hoàn tiền như thế nào?",
+    botAnswer:
+      "Chúng tôi hoàn tiền toàn bộ nếu bạn hủy đặt phòng trong vòng 24 giờ trước khi đến.",
+    category: "Thanh toán",
+  },
+  {
+    id: 13,
+    clientQuestion: "Khách sạn có bể bơi không?",
+    botAnswer: "Có, khách sạn của chúng tôi có bể bơi trong nhà và ngoài trời.",
+    category: "Dịch vụ",
+  },
+  {
+    id: 14,
+    clientQuestion: "Có dịch vụ giặt ủi không?",
+    botAnswer: "Có, khách sạn cung cấp dịch vụ giặt ủi với một khoản phí nhỏ.",
     category: "Dịch vụ",
   },
 ];

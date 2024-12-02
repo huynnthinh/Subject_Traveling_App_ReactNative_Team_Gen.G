@@ -1,31 +1,37 @@
 import {
   FlatList,
   Image,
-  ScrollView,
   StyleSheet,
   Text,
   View,
+  TextInput,
+  TouchableOpacity,
 } from "react-native";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import AntDesign from "react-native-vector-icons/AntDesign";
-import { TextInput } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { TouchableOpacity } from "react-native";
 import Fuse from "fuse.js";
 import bookingFAQs from "../data/bookingFAQs";
+import { useSelector } from "react-redux";
+
 const InboxScreen = () => {
   const [buttonFooterState, setButtonFooterState] = useState("Inbox");
   const navigation = useNavigation();
-
+  const { account } = useSelector((state) => state.data);
   const [category, setCategory] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
-  const [filteredFAQs, setFilteredFAQs] = useState([]);
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState("");
   const [isBotTyping, setIsBotTyping] = useState(false);
-  const [displayedText, setDisplayedText] = useState(""); // Hiển thị tin nhắn bot với hiệu ứng
+  const [displayedText, setDisplayedText] = useState("");
+  const flatListRef = useRef(null);
 
-  //config fuse.js
+  useEffect(() => {
+    if (flatListRef.current) {
+      flatListRef.current.scrollToEnd({ animated: true });
+    }
+  }, [messages]);
+
   function removeAccentsAndSpecialChars(str) {
     return str
       .normalize("NFD")
@@ -38,10 +44,11 @@ const InboxScreen = () => {
   function toLowerCaseNoAccentsAndSpecialChars(str) {
     return removeAccentsAndSpecialChars(str).toLowerCase();
   }
+
   const options = {
     includeScore: true,
     keys: ["normalizedQuestion"],
-    distance: 100, // Tăng yêu cầu về độ dài khớp
+    distance: 100,
     threshold: 0.4,
     getFn: (obj, path) => toLowerCaseNoAccentsAndSpecialChars(obj[path]),
   };
@@ -70,13 +77,11 @@ const InboxScreen = () => {
       const filteredData = bookingFAQs.filter(
         (item) => item.category === selectedCategory
       );
-      // console.log(filteredData);
       filteredData.forEach((item) => {
-        const count = messages.length;
         setMessages((prev) => [
           ...prev,
           {
-            id: `${Date.now()}-${Math.random()}`, // Ensure uniqueness
+            id: `${Date.now()}-${Math.random()}`,
             message: item.clientQuestion,
             sender: "server",
           },
@@ -85,16 +90,15 @@ const InboxScreen = () => {
     }
   }, [selectedCategory]);
 
-  const renderList = ({ item }) => {
-    return (
-      <TouchableOpacity
-        onPress={() => setSelectedCategory(item.name)}
-        style={styles.listItem}
-      >
-        <Text style={styles.listItemText}>{item.name}</Text>
-      </TouchableOpacity>
-    );
-  };
+  const renderList = ({ item }) => (
+    <TouchableOpacity
+      onPress={() => setSelectedCategory(item.name)}
+      style={styles.listItem}
+    >
+      <Text style={styles.listItemText}>{item.name}</Text>
+    </TouchableOpacity>
+  );
+
   const handleBotResponse = (question) => {
     if (!question) return;
 
@@ -103,16 +107,32 @@ const InboxScreen = () => {
       { id: Date.now(), message: question, sender: "client" },
     ]);
     const questionNormalized = toLowerCaseNoAccentsAndSpecialChars(question);
-    // const botResponse = bookingFAQs.find(
-    //   (faq) => faq.clientQuestion === question
-    // );
+
+    if (
+      questionNormalized === "hi" ||
+      questionNormalized === "hello" ||
+      questionNormalized === "xin chao" ||
+      questionNormalized === "2"
+    ) {
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: Date.now(),
+          message:
+            "Xin chào " +
+            account.name +
+            ", Bạn có thế chat hoặc chọn một trong các câu hỏi dưới đây để được hỗ trợ nhanh nhất",
+          sender: "server",
+          icon: "robot",
+        },
+      ]);
+      return;
+    }
+
     const result = fuse.search(questionNormalized);
-    console.log(questionNormalized + "//");
-    console.log(result);
     const botResponse = result[0] ? result[0].item : "";
 
     if (botResponse && question.trim().length > 3) {
-      // Bot gõ câu trả lời nếu tìm thấy
       setIsBotTyping(true);
       let index = 0;
       setDisplayedText("");
@@ -137,7 +157,6 @@ const InboxScreen = () => {
         }
       }, 20);
     } else {
-      // Câu trả lời mặc định khi không tìm thấy
       setMessages((prev) => [
         ...prev,
         {
@@ -149,26 +168,10 @@ const InboxScreen = () => {
       ]);
     }
   };
-  // const renderQuestion = ({ item }) => {
-  //   return (
-  //     <TouchableOpacity
-  //       style={[
-  //         styles.messageContainer,
-  //         styles.serverMessage,
-  //         { backgroundColor: "white" },
-  //       ]}
-  //       onPress={() => {
-  //         handleBotResponse(item.clientQuestion);
-  //       }}
-  //     >
-  //       <Text style={styles.messageText}>{item.clientQuestion}</Text>
-  //     </TouchableOpacity>
-  //   );
-  // };
+
   const renderMessage = ({ item }) => {
     const isClient = item.sender === "client";
 
-    // Nếu tin nhắn là câu hỏi, hiển thị dưới dạng nút TouchableOpacity
     if (item.sender === "server" && item.message.includes("?")) {
       return (
         <TouchableOpacity
@@ -177,14 +180,13 @@ const InboxScreen = () => {
             styles.serverMessage,
             { backgroundColor: "lightgreen" },
           ]}
-          onPress={() => handleBotResponse(item.message)} // Gọi hàm khi nhấn vào câu hỏi
+          onPress={() => handleBotResponse(item.message)}
         >
           <Text style={styles.messageText}>{item.message}</Text>
         </TouchableOpacity>
       );
     }
 
-    // Nếu không phải câu hỏi, hiển thị tin nhắn bình thường (câu trả lời của bot hoặc client)
     return (
       <View
         style={[
@@ -197,9 +199,9 @@ const InboxScreen = () => {
       </View>
     );
   };
+
   return (
     <View style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <AntDesign name="arrowleft" size={30} color="#41cbda" />
@@ -211,54 +213,17 @@ const InboxScreen = () => {
         <Text style={styles.headerText}>Thưa Đấng Thịnh và Thái</Text>
       </View>
 
-      {/* Main Content */}
       <View style={styles.body}>
-        <ScrollView nestedScrollEnabled={true}>
-          <View
-            style={[
-              styles.messageContainer,
-              styles.serverMessage,
-              { backgroundColor: "#e0f7fa" },
-            ]}
-          >
-            <Text style={[styles.messageText]}>Chào bạn!</Text>
-          </View>
-          <View
-            style={[
-              styles.messageContainer,
-              styles.serverMessage,
-              { backgroundColor: "#e0f7fa" },
-            ]}
-          >
-            <Text style={[styles.messageText]}>
-              Câu trả lời của mình chỉ mang tính tương đối!
-            </Text>
-          </View>
-          <View
-            style={[
-              styles.messageContainer,
-              styles.serverMessage,
-              { backgroundColor: "#e0f7fa" },
-            ]}
-          >
-            <Text style={[styles.messageText]}>
-              Bạn có thể liên hệ HOTLINE: 0336784220 để được hỗ trợ nhanh nhất
-              và chi tiết nha! Cảm ơn bạn đã sử dụng dịch vụ
-            </Text>
-          </View>
-
-          <FlatList
-            data={messages}
-            renderItem={renderMessage}
-            keyExtractor={(item) => item.id.toString()}
-            nestedScrollEnabled={true}
-          />
-          {/* <FlatList
-            data={filteredFAQs}
-            renderItem={renderQuestion}
-            keyExtractor={(item) => item.id.toString()}
-          /> */}
-        </ScrollView>
+        <FlatList
+          ref={flatListRef}
+          data={messages}
+          renderItem={renderMessage}
+          keyExtractor={(item) => item.id.toString()}
+          onContentSizeChange={() =>
+            flatListRef.current?.scrollToEnd({ animated: true })
+          }
+          contentContainerStyle={{ paddingBottom: 20 }}
+        />
         <View style={styles.inputContainer}>
           <FlatList
             data={category}
@@ -278,15 +243,6 @@ const InboxScreen = () => {
               style={styles.sendButton}
               onPress={() => {
                 handleBotResponse(text);
-                // setMessages([
-                //   ...messages,
-                //   {
-                //     id: Date.now(),
-                //     message: text,
-                //     sender: "client",
-                //     icon: "hearto",
-                //   },
-                // ]);
                 setText("");
               }}
             >
@@ -329,13 +285,6 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     width: "100%",
     backgroundColor: "white",
-  },
-  greetingContainer: {
-    padding: 10,
-  },
-  bodyText: {
-    fontSize: 16,
-    color: "#555",
   },
   textInputContainer: {
     flexDirection: "row",
@@ -390,9 +339,6 @@ const styles = StyleSheet.create({
   messageText: {
     color: "#333",
     fontSize: 16,
-  },
-  icon: {
-    marginRight: 5,
   },
 });
 
